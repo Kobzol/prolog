@@ -2,10 +2,10 @@
 :- dynamic p/2.
 
 % game field
-p([1,1], ' ').
-p([1,2], ' ').
-p([1,3], ' ').
-p([1,4], ' ').
+p([1,1], x).
+p([1,2], o).
+p([1,3], o).
+p([1,4], o).
 p([1,5], ' ').
 p([1,6], ' ').
 p([1,7], ' ').
@@ -18,9 +18,9 @@ p([2,3], ' ').
 p([2,4], ' ').
 p([2,5], ' ').
 p([2,6], ' ').
-p([2,7], ' ').
-p([2,8], ' ').
-p([2,9], ' ').
+p([2,7], o).
+p([2,8], o).
+p([2,9], o).
 p([2,10], ' ').
 p([3,1], ' ').
 p([3,2], ' ').
@@ -229,23 +229,32 @@ write('   1| '),write(P1_1), write(' | '),write(P2_1), write(' | '),write(P3_1),
 write('     --- --- --- --- --- --- --- --- --- ---'), nl,
 write('      1   2   3   4   5   6   7   8   9   10'), nl.
 
-% horizontal
+% Objects
+% horizontal right
 o(o1, [X,Y], [X1, Y], [X2, Y], [X3, Y], [X4, Y]) :-
 	X1 is X + 1,
 	X2 is X + 2,
 	X3 is X + 3,
 	X4 is X + 4.
-o(o1_reverse, P1, P2, P3, P4, P5) :- o(o1, P5, P4, P3, P2, P1).
-
-% vertical
+% horizontal left
+o(o1_r, [X,Y], [X1, Y], [X2, Y], [X3, Y], [X4, Y]) :-
+	X1 is X - 1,
+	X2 is X - 2,
+	X3 is X - 3,
+	X4 is X - 4.
+% vertical up
 o(o2, [X, Y], [X, Y1], [X, Y2], [X, Y3], [X, Y4]) :-
 	Y1 is Y + 1,
 	Y2 is Y + 2,
 	Y3 is Y	+ 3,
 	Y4 is Y + 4.
-o(o2_reverse, P1, P2, P3, P4, P5) :- o(o2, P5, P4, P3, P2, P1).
-
-% diagonal up
+% vertical down
+o(o2_r, [X, Y], [X, Y1], [X, Y2], [X, Y3], [X, Y4]) :-
+	Y1 is Y - 1,
+	Y2 is Y - 2,
+	Y3 is Y	- 3,
+	Y4 is Y - 4.
+% diagonal right up
 o(o3, [X, Y], [X1, Y1], [X2, Y2], [X3, Y3], [X4, Y4]) :-
 	X1 is X	+ 1,
 	X2 is X + 2,
@@ -255,9 +264,17 @@ o(o3, [X, Y], [X1, Y1], [X2, Y2], [X3, Y3], [X4, Y4]) :-
 	Y2 is Y + 2,
 	Y3 is Y + 3,
 	Y4 is Y + 4.
-o(o3_reverse, P1, P2, P3, P4, P5) :- o(o3, P5, P4, P3, P2, P1).
-
-% diagonal down
+% diagonal left down
+o(o3_r, [X, Y], [X1, Y1], [X2, Y2], [X3, Y3], [X4, Y4]) :-
+	X1 is X	- 1,
+	X2 is X - 2,
+	X3 is X - 3,
+	X4 is X - 4,
+	Y1 is Y	- 1,
+	Y2 is Y - 2,
+	Y3 is Y - 3,
+	Y4 is Y - 4.
+% diagonal right down
 o(o4, [X, Y], [X1, Y1], [X2, Y2], [X3, Y3], [X4, Y4]) :-
 	X1 is X	+ 1,
 	X2 is X + 2,
@@ -267,12 +284,22 @@ o(o4, [X, Y], [X1, Y1], [X2, Y2], [X3, Y3], [X4, Y4]) :-
 	Y2 is Y - 2,
 	Y3 is Y - 3,
 	Y4 is Y - 4.
-o(o4_reverse, P1, P2, P3, P4, P5) :- o(o4, P5, P4, P3, P2, P1).
+% diagonal left up
+o(o4_r, [X, Y], [X1, Y1], [X2, Y2], [X3, Y3], [X4, Y4]) :-
+	X1 is X	- 1,
+	X2 is X - 2,
+	X3 is X - 3,
+	X4 is X - 4,
+	Y1 is Y	+ 1,
+	Y2 is Y + 2,
+	Y3 is Y + 3,
+	Y4 is Y + 4.
+
 
 % check five-in-a-row (who, position)
 haswon(X, [P1, P2, P3, P4, P5]) :-
 	p(P1, X), o(_, P1, P2, P3, P4, P5), p(P2, X), p(P3, X), p(P4, X), p(P5, X),
-	nl, write('Vyhral: '), write(X), write(': '), write([P1, P2, P3, P4, P5]), nl.
+	nl, write('Won: '), write(X), write(': '), write([P1, P2, P3, P4, P5]), nl.
 
 check(X, [P1, P2, P3, P4, P5]) :- haswon(X, [P1, P2, P3, P4, P5]).
 check(_, _).
@@ -283,8 +310,8 @@ check(_, _).
 % assert - assign predicate
 
 
-gameended :- haswon(o, _), write('Hra skoncila, vyhral o'), nl.
-gameended :- haswon(x, _), write('Hra skoncila, vyhral x'), nl.
+gameended :- haswon(o, _), write('Game ended, won: o'), nl.
+gameended :- haswon(x, _), write('Game ended, won: x'), nl.
 
 gameruns :- not(gameended), p([_, _], ' ').
 
@@ -298,33 +325,64 @@ move :- gameruns,
 move :- gameruns,
 	p(P1, o), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, ' '), p(P4, o), p(P5, o),
 	retract(p(P3, ' ')), assert(p(P3, o)), write('Complete 5 in a row P3: '), write(P3), nl, check(o, _), printField.
-move :- gameruns,
-	p(P1, o), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, o), p(P4, o), p(P5, o),
-	retract(p(P2, ' ')), assert(p(P2, o)), write('Complete 5 in a row P2: '), write(P2), nl, check(o, _), printField.
-move :- gameruns,
-	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, o), p(P5, o),
-	retract(p(P1, ' ')), assert(p(P1, o)), write('Complete 5 in a row P1: '), write(P1), nl, check(o, _), printField.
+
 
 % block opponent's four-in-a-row
 move :- gameruns,
 	p(P1, x), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, x), p(P5, ' '),
 	retract(p(P5, ' ')), assert(p(P5, o)), write('Block 5 in a row P5: '), write(P5), nl, check(o, _), printField.
+move :- gameruns,
+	p(P1, x), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, ' '), p(P5, x),
+	retract(p(P4, ' ')), assert(p(P4, o)), write('Block 5 in a row P4: '), write(P4), nl, check(o, _), printField.
+move :- gameruns,
+	p(P1, x), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, ' '), p(P4, x), p(P5, x),
+	retract(p(P3, ' ')), assert(p(P3, o)), write('Block 5 in a row P3: '), write(P3), nl, check(o, _), printField.
+move :- gameruns,
+	p(P1, x), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, x), p(P4, x), p(P5, ' '),
+	retract(p(P2, ' ')), assert(p(P2, o)), write('Block 5 in a row P2: '), write(P2), nl, check(o, _), printField.
 
 
 % extend three-in-a-row
-
+move :- gameruns,
+	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, o), p(P5, ' '),
+	retract(p(P1, ' ')), assert(p(P1, o)), write('Extend 3 in a row P1 (free priority): '), write(P1), nl, check(o, _), printField.
+move :- gameruns,
+	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, o), p(P5, _),
+	retract(p(P1, ' ')), assert(p(P1, o)), write('Extend 3 in a row P1: '), write(P1), nl, check(o, _), printField.
+move :- gameruns,
+	p(P1, o), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, ' '), p(P5, _),
+	retract(p(P4, ' ')), assert(p(P4, o)), write('Extend 3 in a row P4: '), write(P4), nl, check(o, _), printField.
+move :- gameruns,
+	p(P1, o), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, o), p(P4, o), p(P5, _),
+	retract(p(P2, ' ')), assert(p(P2, o)), write('Extend 3 in a row P2: '), write(P2), nl, check(o, _), printField.
 
 % cross (attack)
+move :- gameruns,
+	p(P1, _), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, o), p(P4, o), p(P5, _),
+	p(P6, _), P1 \= P6, o(_, P6, P2, P7, P8, P9), p(P7, o), p(P8, o), p(P9, _),
+	retract(p(P2, ' ')), assert(p(P2, o)), write('Extend cross one side: '), write(P2), nl, check(o, _), printField.
 
 
 % cross (defend)
 move :- gameruns,
-	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, x), p(P4, x), p(P5, ' '),
-	p(P6, ' '), P1 \= P6, o(_, P6, P2, P7, P8, P9), p(P7, x), p(P8, x), p(P9, ' '),
-	retract(p(P2, ' ')), assert(p(P2, o)), write('Block opponents cross: '), write(P2), nl, check(o, _), printField.
+	p(P1, _), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, x), p(P4, x), p(P5, _),
+	p(P6, _), P1 \= P6, o(_, P6, P2, P7, P8, P9), p(P7, x), p(P8, x), p(P9, _),
+	retract(p(P2, ' ')), assert(p(P2, o)), write('Block opponents cross one side: '), write(P2), nl, check(o, _), printField.
 
+
+% block three-in-a-row
 move :- gameruns,
-	p([5, 5], ' '), retract(p([5, 5], ' ')), assert(p([5, 5], o)), write('Assign to center'), check(o, _), printField.
+	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, x), p(P5, _),
+	retract(p(P1, ' ')), assert(p(P1, o)), write('Block 3 in a row P1: '), write(P1), nl, check(o, _), printField.
+move :- gameruns,
+	p(P1, x), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, ' '), p(P5, _),
+	retract(p(P4, ' ')), assert(p(P4, o)), write('Block 3 in a row P4: '), write(P4), nl, check(o, _), printField.
+
+
+% move to center
+move :- gameruns,
+	p([X, Y], ' '), X < 7, X > 4, Y < 7, Y > 4, retract(p([X, Y], ' ')), assert(p([X, Y], o)), write('Assign to center'), check(o, _), printField.
+
 
 % move to an empty slot
 move :- gameruns,
