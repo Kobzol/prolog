@@ -9,7 +9,7 @@ p([1,2], ' ').
 p([1,3], ' ').
 p([1,4], ' ').
 p([1,5], ' ').
-p([1,6], o).
+p([1,6], ' ').
 p([1,7], ' ').
 p([1,8], ' ').
 p([1,9], ' ').
@@ -319,7 +319,7 @@ gameruns :- not(gameended), p([_, _], ' ').
 
 
 hasturn(o).
-% switchturn :- hasturn(o), retract(hasturn(o)), assert(hasturn(x)) ; hasturn(x), retract(hasturn(x)), assert(hasturn(o)).
+/*switchturn :- hasturn(o), retract(hasturn(o)), assert(hasturn(x)) ; hasturn(x), retract(hasturn(x)), assert(hasturn(o)).*/
 switchturn.
 
 % complete five-in-a-row
@@ -349,22 +349,32 @@ move :- gameruns, hasturn(o),
 	map(o, P2), retract(p(P2, ' ')), assert(p(P2, o)), write('Block 5 in a row P2: '), write(P2), nl, check(o, _), printField, switchturn.
 
 
+% extend three-in-a-row free
+move :- gameruns, hasturn(o),
+	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, o), p(P5, ' '),
+	map(o, P1), retract(p(P1, ' ')), assert(p(P1, o)), write('Extend 3 in a row P1 (free priority): '), write(P1), nl, check(o, _), printField, switchturn.
+
+
 % block three-in-a-row
 move :- gameruns, hasturn(o),
 	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, x), p(P5, ' '),
 	map(o, P1), retract(p(P1, ' ')), assert(p(P1, o)), write('Block 3 in a row P1 (fp): '), write(P1), nl, check(o, _), printField, switchturn.
 move :- gameruns, hasturn(o),
-	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, x), p(P5, _),
-	map(o, P1), retract(p(P1, ' ')), assert(p(P1, o)), write('Block 3 in a row P1: '), write(P1), nl, check(o, _), printField, switchturn.
-move :- gameruns, hasturn(o),
 	p(P1, x), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, ' '), p(P5, ' '),
-	map(o, P4), retract(p(P4, ' ')), assert(p(P4, o)), write('Block 3 in a row P4 (fp): '), write(P4), nl, check(o, _), printField, switchturn.
+	map(o, P4), retract(p(P4, ' ')), assert(p(P4, o)), write('Block 3 in a row P2 (fp): '), write(P4), nl, check(o, _), printField, switchturn.
+/*move :- gameruns, hasturn(o),
+	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, x), p(P5, _),
+	map(o, P1), retract(p(P1, ' ')), assert(p(P1, o)), write('Block 3 in a row P2: '), write(P1), nl, check(o, _), printField, switchturn.
 move :- gameruns, hasturn(o),
 	p(P1, x), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, x), p(P4, ' '), p(P5, _),
-	map(o, P4), retract(p(P4, ' ')), assert(p(P4, o)), write('Block 3 in a row P4: '), write(P4), nl, check(o, _), printField, switchturn.
+	map(o, P4), retract(p(P4, ' ')), assert(p(P4, o)), write('Block 3 in a row P4: '), write(P4), nl, check(o, _), printField, switchturn.*/
 
 
 % cross (attack)
+move :- gameruns, hasturn(o),
+	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, _), p(P5, _),
+	p(P6, o), P6 \= P2, o(_, P1, P6, P7, P8, P9), p(P7, o), p(P8, _), p(P9, _),
+	map(o, P1), retract(p(P1, ' ')), assert(p(P1, o)), write('Extend cross center: '), write(P1), nl, check(o, _), printField, switchturn.
 move :- gameruns, hasturn(o),
 	p(P1, _), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, o), p(P4, o), p(P5, _),
 	p(P6, _), P1 \= P6, o(_, P6, P2, P7, P8, P9), p(P7, o), p(P8, o), p(P9, _),
@@ -374,20 +384,17 @@ move :- gameruns, hasturn(o),
 	p(P6, o), P1 \= P6, o(_, P6, P7, P3, P8, P9), p(P7, o), p(P8, _), p(P9, _),
 	map(o, P3), retract(p(P3, ' ')), assert(p(P3, o)), write('Extend cross symmetric: '), write(P3), nl, check(o, _), printField, switchturn.
 move :- gameruns, hasturn(o),
-	p(P1, _), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, ' '), p(P4, o), p(P5, _),
-	p(P6, _), P1 \= P6, o(_, P6, P7, P3, P8, P9), p(P7, o), p(P8, o), p(P9, _),
-	map(o, P3), retract(p(P3, ' ')), assert(p(P3, o)), write('Extend cross center: '), write(P3), nl, check(o, _), printField, switchturn.
+	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, ' '), p(P4, o), p(P5, _),
+	p(P6, _), P6 \= P1, P6 \= P5, o(_, P6, P7, P3, P8, P9), p(P7, o), p(P8, o), p(P9, _),
+	map(o, P3), retract(p(P3, ' ')), assert(p(P3, o)), write('Extend cross star: '), write(P3), nl, check(o, _), printField, switchturn.
 
 
 % extend three-in-a-row
 move :- gameruns, hasturn(o),
-	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, o), p(P5, ' '),
-	map(o, P1), retract(p(P1, ' ')), assert(p(P1, o)), write('Extend 3 in a row P1 (free priority): '), write(P1), nl, check(o, _), printField, switchturn.
+	p(P1, o), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, ' '), p(P5, ' '),
+	map(o, P4), retract(p(P4, ' ')), assert(p(P4, o)), write('Extend 3 in a row P1: '), write(P4), nl, check(o, _), printField, switchturn.
 move :- gameruns, hasturn(o),
-	p(P1, ' '), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, o), p(P4, o), p(P5, _),
-	map(o, P1), retract(p(P1, ' ')), assert(p(P1, o)), write('Extend 3 in a row P1: '), write(P1), nl, check(o, _), printField, switchturn.
-move :- gameruns, hasturn(o),
-	p(P1, o), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, o), p(P4, o), p(P5, _),
+	p(P1, o), o(_, P1, P2, P3, P4, P5), p(P2, ' '), p(P3, o), p(P4, o), p(P5, ' '),
 	map(o, P2), retract(p(P2, ' ')), assert(p(P2, o)), write('Extend 3 in a row P2: '), write(P2), nl, check(o, _), printField, switchturn.
 
 
@@ -398,7 +405,7 @@ move :- gameruns, hasturn(o),
 	map(o, P2), retract(p(P2, ' ')), assert(p(P2, o)), write('Block opponents cross one side: '), write(P2), nl, check(o, _), printField, switchturn.
 move :- gameruns, hasturn(o),
 	p(P1, _), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, ' '), p(P4, x), p(P5, _),
-	p(P6, x), P1 \= P6, o(_, P6, P7, P3, P8, P9), p(P7, x), p(P8, _), p(P9, _),
+	p(P6, x), P1 \= P6, P1 \= P9, o(_, P6, P7, P3, P8, P9), p(P7, x), p(P8, _), p(P9, _),
 	map(o, P3), retract(p(P3, ' ')), assert(p(P3, o)), write('Block opponents cross symmetric: '), write(P3), nl, check(o, _), printField, switchturn.
 move :- gameruns, hasturn(o),
 	p(P1, _), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, ' '), p(P4, x), p(P5, _),
@@ -409,7 +416,7 @@ move :- gameruns, hasturn(o),
 % cross (attack 2)
 move :- gameruns, hasturn(o),
 	p(P1, o), o(_, P1, P2, P3, P4, P5), p(P2, o), p(P3, ' '), p(P4, ' '), p(P5, _),
-	p(P6, _), P1 \= P6, o(_, P6, P7, P3, P8, P9), p(P7, o), p(P8, ' '), p(P9, _),
+	p(P6, _), P6 \= P1, P6 \= P5, o(_, P6, P7, P3, P8, P9), p(P7, o), p(P8, ' '), p(P9, _),
 	map(o, P3), retract(p(P3, ' ')), assert(p(P3, o)), write('Extend cross ||_: '), write(P3), nl, check(o, _), printField, switchturn.
 
 
@@ -417,7 +424,7 @@ move :- gameruns, hasturn(o),
 move :- gameruns, hasturn(o),
 	p(P1, x), o(_, P1, P2, P3, P4, P5), p(P2, x), p(P3, ' '), p(P4, ' '), p(P5, _),
 	%p(P6, _), P1 \= P6, o(_, P6, P7, P3, P8, P9), p(P7, x), p(P8, ' '), p(P9, _),
-	p(P6, x), P6 \= P1, P6 \= P2, o(_, P6, P3, P7, P8, P9), p(P7, _), p(P8, _), p(P9, _),
+	p(P6, x), P6 \= P1, P6 \= P2, P6 \= P5, o(_, P6, P3, P7, P8, P9), p(P7, _), p(P8, _), p(P9, _),
 	map(o, P3), retract(p(P3, ' ')), assert(p(P3, o)), write('Block opponents cross ||_: '), write(P3), nl, check(o, _), printField, switchturn.
 
 
